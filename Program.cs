@@ -4,30 +4,51 @@
 
 using System.Numerics;
 
-int numProcesses; //Variable to hold the total number of processes
-int numResources; //Variable to hold the total number of different resources
-StreamReader read = new StreamReader("data.txt"); //StreamReader object used to read the file
-string temp; //String to temporarially hold various values.
 
-numProcesses = int.Parse(read.ReadLine()); //Read the first line to get the number of processes
-numResources = int.Parse(read.ReadLine()); //Read the second line to get the number of resources
-
-temp = read.ReadLine();
-string[] numHolder = temp.Split(' ');
-int[] resourceTracker = new int[numResources]; //Array to hold the current count of avaliable instances of the different resources
-for (int i = 0; i < numResources; i++)
+try
 {
-    resourceTracker[i] = int.Parse(numHolder[i]);
+    int numProcesses; //Variable to hold the total number of processes
+    int numResources; //Variable to hold the total number of different resources
+    StreamReader read = new StreamReader("data.txt"); //StreamReader object used to read the file
+    string temp; //String to temporarially hold various values.
+
+    numProcesses = int.Parse(read.ReadLine()); //Read the first line to get the number of processes
+    numResources = int.Parse(read.ReadLine()); //Read the second line to get the number of resources
+
+    temp = read.ReadLine();
+    string[] numHolder = temp.Split(' ');
+    int[] resourceTracker = new int[numResources]; //Array to hold the current count of avaliable instances of the different resources
+    for (int i = 0; i < numResources; i++)
+    {
+        resourceTracker[i] = int.Parse(numHolder[i]);
+    }
+
+    int[,] processTracker = new int[numProcesses, numResources];
+    int[,] processRequirements = new int[numProcesses, numResources];
+
+    for (int i = 0; i < numProcesses; i++)
+    {
+        temp = read.ReadLine();
+        numHolder = temp.Split(' ');
+        for (int j = 0; j < numResources; j++)
+        {
+            processTracker[i, j] = int.Parse(numHolder[j]);
+        }
+    }
+
+
+    for (int i = 0; i < numProcesses; i++)
+    {
+        temp = read.ReadLine();
+        numHolder = temp.Split(' ');
+        for (int j = 0; j < numResources; j++)
+        {
+            processRequirements[i, j] = int.Parse(numHolder[j]);
+        }
+    }
 }
 
-int[,] processTracker = new int [numProcesses,numResources];
-
-for(int i = 0;i < numProcesses;i++)
+catch
 {
-    temp = read.ReadLine();
-    numHolder = temp.Split(' ');
-    for(int j = 0; j<numResources; j++)
-    {
-        processTracker[i,j] = int.Parse(numHolder[j]);
-    }
+    Console.WriteLine("An error has occured. Please ensure that your data.txt file follows the required specifications");
 }
