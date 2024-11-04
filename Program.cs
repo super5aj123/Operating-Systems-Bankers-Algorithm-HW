@@ -76,6 +76,26 @@ try
         }
         else if (int.TryParse(temp, out int currentProcess) == true && currentProcess<numProcesses) //If the user's input could successfully be translated to an integer, and is a valid process number, assign it to currentProcess, and then proceed.
         {
+            Console.Write("Please enter the resource(s) that process " +  currentProcess + " is attempting to request: ");
+            temp = Console.ReadLine();
+            numHolder = temp.Split(' ');
+            int[] currentRequest = new int[numResources];
+            bool doesParse = false;
+
+            for(int i=0;i<numResources;i++) //Pull the numbers out of the user's input, and give an error message if this could not be done successfully.
+            {
+                doesParse = int.TryParse(numHolder[i], out currentRequest[i]);
+                if (doesParse == false)
+                {
+                    Console.WriteLine("Your entry could not be successfully parsed. Please try again.");
+                    break;
+                }
+            }
+
+            if(doesParse == true) //If doesParse == true, then the user's input was successfully parsed, and Banker's Algorithm can now be calculated.
+            {
+
+            }
 
 
 
