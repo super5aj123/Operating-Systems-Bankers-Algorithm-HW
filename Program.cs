@@ -1,5 +1,12 @@
-﻿using System;
+﻿//Anthony Rowan
+//10/28/24
+//This program will find safe sequences to complete processes by using the banker's algorithm. The information used for this process will be taken from a text file named "data.txt".
+//IMPORTANT: C# requires that relative file pathnames be in the folder of the executable, NOT the .sln file. Please ensure that if you are compiling from source, that you have a data.txt file in the folder with your new executable.
+
+using System;
 using System.IO;
+
+
 
 try
 {
