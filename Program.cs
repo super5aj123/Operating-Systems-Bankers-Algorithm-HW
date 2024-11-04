@@ -49,11 +49,7 @@ try
         }
     }
 
-    bool[] finish = new bool[numProcesses]; //Finish will store if a process has completed yet, or if it still needs to complete.
-    for(int i = 0;i < numProcesses; i++)
-    {
-        finish[i] = false;
-    }
+    
 
     int[] avaliableResources = new int[numResources]; //Calcuate the currently avaliable number of each resource
     int[,] needResources = new int[numProcesses, numResources]; //Calculate the number of each resource that each process needs to complete
@@ -107,50 +103,22 @@ try
 
             if(doesParse == true) //If doesParse == true, then the user's input was successfully parsed, and Banker's Algorithm can now be calculated.
             {
-                while (finish[currentProcess] == false) //Loop until the process that was entered by the user is completed.
+                bool[] finish = new bool[numProcesses]; //Finish will store if a process has completed yet, or if it still needs to complete.
+                for (int i = 0; i < numProcesses; i++)
                 {
-                    for(int i=0;i<numProcesses;i++)
-                    {
-                        bool safe = true;
-                        if (finish[i] == false) //If the current process is not finished, check if we can complete it with our currently avaliable resources.
-                        {
-                            for (int j=0;j<numResources;j++)
-                            {
-                                safe = true;
-                                if (processMax[i,j] > resourceTracker[j])
-                                {
-                                    Console.WriteLine("There are too few of resource " + j + " to complete process " + i + ".");
-                                    safe = false;
-                                }
-                                else
-                                {
-                                    Console.WriteLine("There are enough of resource " + j + " to complete process " + i + ".");
-                                }
+                    finish[i] = false;
+                }
 
-                            }
-                            if (safe == true)
-                            {
-                                finish[i] = true;
-                                safeSequence.Append(i); //Add the current process to the list of the processes in the safe sequence.
-                                for (int j=0;i<numResources;i++) //If the state is safe, since the process is now completed, add its current resources to the avaliable resources.
-                                {
-                                    resourceTracker[j] = resourceTracker[j] + processTracker[i,j];
-                                }
-                               
-                            }
-                        }
-                    }
-                }
-                Console.Write("Safe sequence found: <");
-                foreach(int process in safeSequence)
+                avaliableResources = originalavaliableResources;
+                needResources = originalNeedResources;
+
+                for(int i = 0;i<numProcesses;i++) //Loop through all the processes
                 {
-                    Console.Write(process.ToString());
-                    if (process != safeSequence[safeSequence.Length - 1])
+                    for(int j=0;j<numResources;j++) //Loop through all the resources
                     {
-                        Console.Write(',');
+
                     }
                 }
-                Console.Write("> \n");
             }
 
 
