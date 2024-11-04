@@ -55,7 +55,19 @@ try
         finish[i] = false;
     }
 
+    int[] avaliableResources = new int[numResources]; //Calcuate the currently avaliable number of each resource
+    int[,] needResources = new int[numProcesses, numResources]; //Calculate the number of each resource that each process needs to complete
+    for (int i = 0; i < numProcesses; i++)
+    {
+        for (int j = 0;j < numResources; j++)
+        {
+            avaliableResources[j] = avaliableResources[j] - processTracker[i,j];
+            needResources[i,j] = processMax[i,j] - processTracker[i,j];
+        }
+    }
 
+    int[,] originalNeedResources = needResources;
+    int[] originalavaliableResources = avaliableResources;
     int[] originalResourceTracker = resourceTracker;
     int[,] originalProcessTracker = processTracker;
     int[,] originalProcessMax = processMax; //Creates arrays to store the original values from the data.txt file. I figured using a bit more memory would be better than reading the file again, on the off chance a user deletes or alters their file during runtime.
@@ -69,6 +81,7 @@ try
         Console.Write("Which process is requesting more resources? (Enter -1 to exit): ");
         temp = (Console.ReadLine());
         Console.WriteLine(temp);
+        int[] safeSequence = new int[numProcesses];
 
         if (temp == "-1") //If the user inputs -1, exit the program.
         {
@@ -94,11 +107,54 @@ try
 
             if(doesParse == true) //If doesParse == true, then the user's input was successfully parsed, and Banker's Algorithm can now be calculated.
             {
+                while (finish[currentProcess] == false) //Loop until the process that was entered by the user is completed.
+                {
+                    for(int i=0;i<numProcesses;i++)
+                    {
+                        bool safe = true;
+                        if (finish[i] == false) //If the current process is not finished, check if we can complete it with our currently avaliable resources.
+                        {
+                            for (int j=0;j<numResources;j++)
+                            {
+                                safe = true;
+                                if (processMax[i,j] > resourceTracker[j])
+                                {
+                                    Console.WriteLine("There are too few of resource " + j + " to complete process " + i + ".");
+                                    safe = false;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("There are enough of resource " + j + " to complete process " + i + ".");
+                                }
 
+                            }
+                            if (safe == true)
+                            {
+                                finish[i] = true;
+                                safeSequence.Append(i); //Add the current process to the list of the processes in the safe sequence.
+                                for (int j=0;i<numResources;i++) //If the state is safe, since the process is now completed, add its current resources to the avaliable resources.
+                                {
+                                    resourceTracker[j] = resourceTracker[j] + processTracker[i,j];
+                                }
+                               
+                            }
+                        }
+                    }
+                }
+                Console.Write("Safe sequence found: <");
+                foreach(int process in safeSequence)
+                {
+                    Console.Write(process.ToString());
+                    if (process != safeSequence[safeSequence.Length - 1])
+                    {
+                        Console.Write(',');
+                    }
+                }
+                Console.Write("> \n");
             }
 
 
-
+            safeSequence = new int[numResources];
             resourceTracker = originalResourceTracker;
             processTracker = originalProcessTracker; //Reset the arrays to hold their original values.
         }
