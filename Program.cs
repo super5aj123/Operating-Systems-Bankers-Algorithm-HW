@@ -2,7 +2,7 @@
 //10/28/24
 //This program will find safe sequences to complete processes by using the banker's algorithm. The information used for this process will be taken from a text file named "data.txt".
 //IMPORTANT: C# requires that relative file pathnames be in the folder of the executable, NOT the .sln file. Please ensure that if you are compiling from source, that you have a data.txt file in the folder with your new executable.
-//I tried getting the repetition to work, but I can't figure out what variable or array I'm forgetting to reset. If you see weird code that looks like it was an attempt at repetition, that's why.
+//I tried getting the repetition to work, but I can't figure out what variable or array I'm forgetting to reset. If you see weird code that looks like it was an attempt at repetition, that's why. (Though I'm pretty sure I got it all)
 using System;
 using System.IO;
 
@@ -169,7 +169,7 @@ try
                 }
                 else
                 {
-                    Console.WriteLine("Request cannot be granted. Resources not available or exceeds needs.");
+                    Console.WriteLine("Request cannot be granted. There are either too few resources, or the request exceeds the maximum possible for the process.");
                 }
 
 
