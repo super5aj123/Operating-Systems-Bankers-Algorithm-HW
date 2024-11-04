@@ -1,34 +1,28 @@
-﻿//Anthony Rowan
-//10/28/24
-//This program will find safe sequences to complete processes by using the banker's algorithm. The information used for this process will be taken from a text file named "data.txt".
-//IMPORTANT: C# requires that relative file pathnames be in the folder of the executable, NOT the .sln file. Please ensure that if you are compiling from source, that you have a data.txt file in the folder with your new executable.
-using System.Numerics;
-
+﻿using System;
+using System.IO;
 
 try
 {
-    int numProcesses; //Variable to hold the total number of processes
-    int numResources; //Variable to hold the total number of different resources
-    StreamReader read = new StreamReader("data.txt"); //StreamReader object used to read the file
-    string temp; //String to temporarially hold various values.
+    int numProcesses;
+    int numResources;
+    StreamReader read = new StreamReader("data.txt");
+    string temp;
 
-    numProcesses = int.Parse(read.ReadLine()); //Read the first line to get the number of processes
-    numResources = int.Parse(read.ReadLine()); //Read the second line to get the number of resources
+    numProcesses = int.Parse(read.ReadLine());
+    numResources = int.Parse(read.ReadLine());
 
     temp = read.ReadLine();
     string[] numHolder = temp.Split(' ');
-    int[] resourceTracker = new int[numResources]; //Array to hold the current count of avaliable instances of the different resources
+    int[] resourceTracker = new int[numResources];
     for (int i = 0; i < numResources; i++)
     {
         resourceTracker[i] = int.Parse(numHolder[i]);
     }
 
+    int[,] processTracker = new int[numProcesses, numResources];
+    int[,] processMax = new int[numProcesses, numResources];
 
-    int[,] processTracker = new int[numProcesses, numResources]; //This array stores the current number of each resource that each process is using.
-    int[,] processMax = new int[numProcesses, numResources]; //This array stores the maximum number of each resource that each process can request.
-
-
-    for (int i = 0; i < numProcesses; i++) //Get and store the resources already allocated to each process
+    for (int i = 0; i < numProcesses; i++)
     {
         temp = read.ReadLine();
         numHolder = temp.Split(' ');
@@ -38,8 +32,7 @@ try
         }
     }
 
-
-    for (int i = 0; i < numProcesses; i++) //Get and store the number of each resource that each process needs to complete.
+    for (int i = 0; i < numProcesses; i++)
     {
         temp = read.ReadLine();
         numHolder = temp.Split(' ');
@@ -49,49 +42,45 @@ try
         }
     }
 
-    
-
-    int[] avaliableResources = new int[numResources]; //Calcuate the currently avaliable number of each resource
-    int[,] needResources = new int[numProcesses, numResources]; //Calculate the number of each resource that each process needs to complete
-    for (int i = 0; i < numProcesses; i++)
+    int[] availableResources = new int[numResources];
+    int[,] needResources = new int[numProcesses, numResources];
+    for (int j = 0; j < numResources; j++)
     {
-        for (int j = 0;j < numResources; j++)
+        availableResources[j] = resourceTracker[j];
+        for (int i = 0; i < numProcesses; i++)
         {
-            avaliableResources[j] = avaliableResources[j] - processTracker[i,j];
-            needResources[i,j] = processMax[i,j] - processTracker[i,j];
+            availableResources[j] -= processTracker[i, j];
+            needResources[i, j] = processMax[i, j] - processTracker[i, j];
         }
     }
 
+    //avaliable resources, need resources, processtracker
+
+    int[] originalAvailableResources = availableResources;
     int[,] originalNeedResources = needResources;
-    int[] originalavaliableResources = avaliableResources;
-    int[] originalResourceTracker = resourceTracker;
     int[,] originalProcessTracker = processTracker;
-    int[,] originalProcessMax = processMax; //Creates arrays to store the original values from the data.txt file. I figured using a bit more memory would be better than reading the file again, on the off chance a user deletes or alters their file during runtime.
 
-
-
-    while (true) //Loop until the user exits the program
+    while (true) //Loop until the user decides to exit
     {
-
-
+        bool error = false;
         Console.Write("Which process is requesting more resources? (Enter -1 to exit): ");
-        temp = (Console.ReadLine());
+        temp = Console.ReadLine();
         Console.WriteLine(temp);
         int[] safeSequence = new int[numProcesses];
 
-        if (temp == "-1") //If the user inputs -1, exit the program.
+        if (temp == "-1")
         {
             Environment.Exit(0);
         }
-        else if (int.TryParse(temp, out int currentProcess) == true && currentProcess<numProcesses) //If the user's input could successfully be translated to an integer, and is a valid process number, assign it to currentProcess, and then proceed.
+        else if (int.TryParse(temp, out int currentProcess) && currentProcess < numProcesses)
         {
-            Console.Write("Please enter the resource(s) that process " +  currentProcess + " is attempting to request: ");
+            Console.Write("Please enter the number of each resource that process " + currentProcess + " is attempting to request, seperated by a space: ");
             temp = Console.ReadLine();
             numHolder = temp.Split(' ');
             int[] currentRequest = new int[numResources];
-            bool doesParse = false;
+            bool doesParse = true;
 
-            for(int i=0;i<numResources;i++) //Pull the numbers out of the user's input, and give an error message if this could not be done successfully.
+            for (int i = 0; i < numResources; i++)
             {
                 doesParse = int.TryParse(numHolder[i], out currentRequest[i]);
                 if (doesParse == false)
@@ -101,42 +90,102 @@ try
                 }
             }
 
-            if(doesParse == true) //If doesParse == true, then the user's input was successfully parsed, and Banker's Algorithm can now be calculated.
+            if (doesParse) //Only proceed if the user's input could be successfully understood.
             {
-                bool[] finish = new bool[numProcesses]; //Finish will store if a process has completed yet, or if it still needs to complete.
-                for (int i = 0; i < numProcesses; i++)
+                for (int i = 0; i < numResources; i++)
                 {
-                    finish[i] = false;
-                }
-
-                avaliableResources = originalavaliableResources;
-                needResources = originalNeedResources;
-
-                for(int i = 0;i<numProcesses;i++) //Loop through all the processes
-                {
-                    for(int j=0;j<numResources;j++) //Loop through all the resources
+                    if (currentRequest[i] > needResources[currentProcess, i] || currentRequest[i] > availableResources[i])
                     {
-
+                        error = true;
+                        break;
                     }
                 }
+
+                if (error == false)
+                {
+                    for (int i = 0; i < numResources; i++)
+                    {
+                        availableResources[i] -= currentRequest[i];
+                        processTracker[currentProcess, i] += currentRequest[i];
+                        needResources[currentProcess, i] -= currentRequest[i];
+                    }
+
+                    bool[] finish = new bool[numProcesses];
+                    for (int i = 0; i < numProcesses; i++)
+                    {
+                        finish[i] = false;
+                    }
+                    int count = 0;
+                    while (count < numProcesses)
+                    {
+                        bool foundProcess = false;
+                        for (int i = 0; i < numProcesses; i++)
+                        {
+                            if (finish[i] == false)
+                            {
+                                bool canProceed = true;
+                                for (int j = 0; j < numResources; j++)
+                                {
+                                    if (needResources[i, j] > availableResources[j])
+                                    {
+                                        canProceed = false;
+                                        break;
+                                    }
+                                }
+                                if (canProceed == true)
+                                {
+                                    for (int j = 0; j < numResources; j++)
+                                    {
+                                        availableResources[j] += processTracker[i, j];
+                                    }
+                                    safeSequence[count++] = i;
+                                    finish[i] = true;
+                                    foundProcess = true;
+                                }
+                            }
+                        }
+                        if (foundProcess == false)
+                        {
+                            break;
+                        }
+                    }
+
+                    if (count < numProcesses)
+                    {
+                        Console.WriteLine("System is unsafe.");
+                    }
+                    else
+                    {
+                        Console.Write("Request can be granted. Safe sequence: <");
+                        for (int i = 0; i < count; i++)
+                        {
+                            Console.Write(safeSequence[i]);
+                            if (i != count - 1)
+                                Console.Write(", ");
+                        }
+                        Console.WriteLine(">");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Request cannot be granted. Resources not available or exceeds needs.");
+                }
+
+                // Reset arrays to initial state
+                availableResources = originalAvailableResources;
+                processTracker = originalProcessTracker;
+                needResources = originalNeedResources;
+
             }
-
-
-            safeSequence = new int[numResources];
-            resourceTracker = originalResourceTracker;
-            processTracker = originalProcessTracker; //Reset the arrays to hold their original values.
         }
-
         else
         {
             Console.WriteLine("Please ensure that you are entering a valid process number, with no extra characters such as spaces.");
         }
     }
-
 }
-
 catch
 {
-    Console.WriteLine("An error has occured. Please ensure that your data.txt file exists in the folder with your executable, and follows the required specifications.");
+    Console.WriteLine("An error has occurred. Please ensure that your data.txt file exists in the folder with your executable and follows the required specifications.");
     Console.ReadLine();
 }
